@@ -1,27 +1,35 @@
-def poser_question(question, choix, reponse_correcte):
-    print(question)
-    for i, choix in enumerate(choix):
-        print(f"{i + 1}. {choix}")
-    reponse = int(input("Votre réponse (1-4): "))
-    return reponse == reponse_correcte
+from docx import Document
 
-def main():
-    score = 0
+def create_qcm():
+    # Créer un nouveau document Word
+    doc = Document()
+
+    # Ajouter un titre
+    doc.add_heading('Questionnaire à Choix Multiples', 0)
+
+    # Ajouter des questions et des choix
     questions = [
-        ("Quelle est la capitale de la France ?", ["Paris", "Londres", "Berlin", "Madrid"], 1),
-        ("Quelle est la couleur du ciel ?", ["Rouge", "Vert", "Bleu", "Jaune"], 3),
-        ("Combien font 2 + 2 ?", ["3", "4", "5", "6"], 2),
-        ("Quel est le plus grand océan ?", ["Atlantique", "Pacifique", "Indien", "Arctique"], 2)
+        {
+            "question": "Quelle est la capitale de la France ?",
+            "choices": ["A. Paris", "B. Londres", "C. Berlin", "D. Madrid"]
+        },
+        {
+            "question": "Quelle est la couleur du ciel par temps clair ?",
+            "choices": ["A. Bleu", "B. Vert", "C. Rouge", "D. Jaune"]
+        },
+        {
+            "question": "Combien de continents y a-t-il sur Terre ?",
+            "choices": ["A. 5", "B. 6", "C. 7", "D. 8"]
+        }
     ]
 
-    for question, choix, reponse_correcte in questions:
-        if poser_question(question, choix, reponse_correcte):
-            print("Bonne réponse !")
-            score += 1
-        else:
-            print("Mauvaise réponse.")
+    for q in questions:
+        doc.add_paragraph(q["question"], style='List Number')
+        for choice in q["choices"]:
+            doc.add_paragraph(choice, style='List Bullet')
 
-    print(f"Votre score final est de {score} sur {len(questions)}.")
+    # Enregistrer le document
+    doc.save('QCM.docx')
 
 if __name__ == "__main__":
-    main()
+    create_qcm()
