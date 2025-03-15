@@ -11,7 +11,10 @@ def lire_questionnaire(fichier):
         line = line.strip() #supprime les espaces blanc en début et fin de lignes
         if line:  # Si la ligne n'est pas vide
             if current_question is None:
-                current_question = {'question': line, 'reponses': []} #liste contenant la question actuelle et liste vide pour stocker ses réponses
+                current_question = {'question': line, 'reponses': [], 'bonne_reponse': None, } #liste contenant la question actuelle, la liste vide pour stocker ses réponses 
+            elif len(current_question['reponses']) == 4:
+                numr = int(line)
+                current_question['bonne_reponse'] = current_question['reponses'][numr-1]
             else:
                 current_question['reponses'].append(line)
         else:  # Ligne vide indique la fin d'une question
@@ -22,12 +25,19 @@ def lire_questionnaire(fichier):
         questions.append(current_question)
     return questions
 
-def selectionner_questions(questions, nombre=20):
+def selectionner_questions(questions, nombre):
     return random.sample(questions, nombre) #échantillon aléatoire sans remise
 
 def melanger_reponses(questions):
     for question in questions:
         random.shuffle(question['reponses']) #mélange la liste des réponses possible
+        compteur = 0
+        for reponse in question['reponses']:
+            compteur += 1
+            if reponse == question['bonne_reponse']:
+                question['bonne_reponse_index'] = compteur  # Stocke le nouvel index correct
+                print(question)
+            
     return questions
 
 def afficher_questionnaire(questions):
@@ -35,6 +45,7 @@ def afficher_questionnaire(questions):
         print(f"Question {i}: {question['question']}")
         for j, reponse in enumerate(question['reponses'], 1):
             print(f"  {j}. {reponse}")
+        print(f"  Bonne réponse : {question['bonne_reponse_index']}")
         print()
 
 # Exemple d'utilisation
