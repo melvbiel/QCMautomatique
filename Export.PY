@@ -1,5 +1,16 @@
 import QCM
 from docx import Document
+from docx.shared import Inches
+from docx.oxml import OxmlElement
+
+def format_paysage(doc):
+    section = doc.sections[0]
+    section.orientation = 1  # Paysage
+    section.page_width, section.page_height = section.page_height, section.page_width
+    section.left_margin = Inches(0.5)
+    section.right_margin = Inches(0.5)
+    section.top_margin = Inches(0.5)
+    section.bottom_margin = Inches(0.5)
 
 def create_qcm():
     questions = QCM.lire_questionnaire('QCM_cinema.txt')
@@ -8,6 +19,7 @@ def create_qcm():
     
     # Créer le document pour l'élève
     doc_questions = Document()
+    format_paysage(doc_questions)  # Définir en paysage
     doc_questions.add_heading('Questionnaire à Choix Multiples', 0)
     
     doc_reponses = Document()
@@ -31,4 +43,5 @@ def create_qcm():
     doc_questions.save('QCM_Questions.docx')
     doc_reponses.save('QCM_Reponses.docx')
 
-create_qcm() # Pour créer le fichier taper dans le terminal: python Export.PY
+create_qcm()
+
