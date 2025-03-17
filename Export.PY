@@ -12,11 +12,20 @@ def format_paysage(doc):
     section.right_margin = Inches(0.5)
     section.top_margin = Inches(0.5)
     section.bottom_margin = Inches(0.5)
+    
+    # Définir la mise en page en deux colonnes après le heading
+    sectPr = section._sectPr
+    cols = OxmlElement('w:cols')
+    cols.set(qn('w:num'), '2')  # Deux colonnes
+    cols.set(qn('w:space'), '720')  # Espacement entre les colonnes
+    sectPr.append(cols)
 
-def set_line_spacing(paragraph, spacing=1.15):
+def set_line_spacing(paragraph, spacing=1.15, before=0, after=0):
     p_pr = paragraph._element.get_or_add_pPr()
     spacing_elem = OxmlElement('w:spacing')
     spacing_elem.set(qn('w:line'), str(int(spacing * 240)))  # 1.15 interligne
+    spacing_elem.set(qn('w:before'), str(before))  # Réduction espace avant
+    spacing_elem.set(qn('w:after'), str(after))  # Réduction espace après
     p_pr.append(spacing_elem)
 
 def create_qcm():
@@ -27,44 +36,30 @@ def create_qcm():
     doc_questions = Document()
     format_paysage(doc_questions)  # Format paysage
     doc_questions.add_heading('Questionnaire à Choix Multiples', 0)
+    doc_questions.add_paragraph()  # Ajoute un espace après le titre pour éviter l'écrasement
     
     doc_reponses = Document()
     doc_reponses.add_heading('Réponses du Questionnaire', 0)
     
     reponses_text = []
     
-    for page in range(2):  # 2 pages
-        table = doc_questions.add_table(rows=5, cols=2)
-        table.autofit = False
-        col_width = Inches(3.0)
+    for index, q in enumerate(questions_melangees):
+        p_question = doc_questions.add_paragraph()
+        run_question = p_question.add_run(f"{index + 1}. {q['question']}")
+        run_question.font.size = Pt(9)
+        set_line_spacing(p_question, 1.15, before=10, after=10)
         
-        for row in table.rows:
-            row.cells[0].width = col_width
-            row.cells[1].width = col_width
+        for k, choice in enumerate(q['reponses'], 1):
+            lettre = chr(96 + k)
+            p = doc_questions.add_paragraph(style='List Bullet')
+            run = p.add_run(f"{lettre}. {choice}")
+            run.font.size = Pt(9)
+            set_line_spacing(p, 1.15, before=5, after=5)
         
-        for i in range(5):  # 5 questions par colonne, total 10 par page
-            for j in range(2):  # 2 colonnes
-                index = i + j * 5 + page * 10  # Placement des questions
-                if index < len(questions_melangees):
-                    q = questions_melangees[index]
-                    cell = table.cell(i, j)
-                    p_question = cell.add_paragraph()
-                    run_question = p_question.add_run(f"{index + 1}. {q['question']}")
-                    run_question.font.size = Pt(9)  # Rétablissement de la taille à 9 pt
-                    set_line_spacing(p_question, 1.15)
-                    
-                    for k, choice in enumerate(q['reponses'], 1):
-                        lettre = chr(96 + k)
-                        p = cell.add_paragraph(style='List Bullet')  # Ajout du style liste à puces
-                        run = p.add_run(f"{lettre}. {choice}")
-                        run.font.size = Pt(9)  # Taille correcte
-                        set_line_spacing(p, 1.15)
-                        
-                        if choice == q['bonne_reponse']:
-                            reponses_text.append(lettre)
+        doc_questions.add_paragraph()  # Ajout d'un saut de ligne après chaque question
         
-        if page == 0:
-            doc_questions.add_page_break()  # Ajouter un saut de page après la première page
+        if q['bonne_reponse'] in q['reponses']:
+            reponses_text.append(chr(96 + q['reponses'].index(q['bonne_reponse']) + 1))
     
     doc_reponses.add_paragraph("Réponses :")
     doc_reponses.add_paragraph(", ".join(reponses_text))
@@ -74,3 +69,4 @@ def create_qcm():
 
 create_qcm()
 print("Fichiers créés avec succès !")
+
