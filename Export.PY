@@ -1,9 +1,9 @@
 import QCM
 from docx import Document
-from docx.shared import Inches, Pt
-from docx.oxml import OxmlElement, ns
+from docx.shared import Inches
+from docx.oxml import OxmlElement
 
-def set_landscape(doc):
+def format_paysage(doc):
     section = doc.sections[0]
     section.orientation = 1  # Paysage
     section.page_width, section.page_height = section.page_height, section.page_width
@@ -19,30 +19,22 @@ def create_qcm():
     
     # Créer le document pour l'élève
     doc_questions = Document()
-    set_landscape(doc_questions)  # Définir en paysage
+    format_paysage(doc_questions)  # Définir en paysage
     doc_questions.add_heading('Questionnaire à Choix Multiples', 0)
-    
-    table = doc_questions.add_table(rows=0, cols=2)
-    table.autofit = True
     
     doc_reponses = Document()
     doc_reponses.add_heading('Réponses du Questionnaire', 0)
     
     reponses_text = []
     
-    for i in range(0, len(questions_melangees), 5):
-        row_cells = table.add_row().cells
-        
-        for col in range(2):
-            if i + col * 5 < len(questions_melangees):
-                q = questions_melangees[i + col * 5]
-                question_text = f"{i + col * 5 + 1}. {q['question']}\n"
-                for j, choice in enumerate(q['reponses'], 1):
-                    lettre = chr(96 + j)  # Convertir 1 -> 'a', 2 -> 'b', etc.
-                    question_text += f"{lettre}. {choice}\n"
-                    if choice == q['bonne_reponse']:
-                        reponses_text.append(lettre)
-                row_cells[col].text = question_text
+    for i, q in enumerate(questions_melangees, 1):
+        doc_questions.add_paragraph(f"{i}. {q['question']}")
+        for j, choice in enumerate(q['reponses'], 1):
+            lettre = chr(96 + j)  # Convertir 1 -> 'a', 2 -> 'b', etc.
+            doc_questions.add_paragraph(f"□{lettre}. {choice}")
+            
+            if choice == q['bonne_reponse']:
+                reponses_text.append(lettre)
     
     doc_reponses.add_paragraph("Réponses :")
     doc_reponses.add_paragraph(", ".join(reponses_text))
@@ -52,5 +44,4 @@ def create_qcm():
     doc_reponses.save('QCM_Reponses.docx')
 
 create_qcm()
-print("Fichiers créés avec succès.")
-
+print("Fichiers créés avec succès !")
