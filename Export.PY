@@ -28,10 +28,15 @@ def create_qcm():
     reponses_text = []
     
     for i, q in enumerate(questions_melangees, 1):
-        doc_questions.add_paragraph(f"{i}. {q['question']}")
+        p_question = doc_questions.add_paragraph()
+        run_question = p_question.add_run(f"{i}. {q['question']}")
+        run_question.font.size = Pt(9)  # Définir la taille de la police à 9 points pour les questions
+        
         for j, choice in enumerate(q['reponses'], 1):
             lettre = chr(96 + j)  # Convertir 1 -> 'a', 2 -> 'b', etc.
-            p = doc_questions.add_paragraph(f"□ {lettre}. {choice}")
+            p = doc_questions.add_paragraph()
+            run = p.add_run(f"□ {lettre}. {choice}")
+            run.font.size = Pt(9)  # Définir la taille de la police à 9 points pour les réponses
             p.paragraph_format.left_indent = Inches(0.25)  # Ajouter un alinéa
             
             if choice == q['bonne_reponse']:
