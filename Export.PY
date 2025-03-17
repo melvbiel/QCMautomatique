@@ -1,6 +1,6 @@
 import QCM
 from docx import Document
-from docx.shared import Inches
+from docx.shared import Inches, Pt
 from docx.oxml import OxmlElement
 
 def format_paysage(doc):
@@ -31,7 +31,8 @@ def create_qcm():
         doc_questions.add_paragraph(f"{i}. {q['question']}")
         for j, choice in enumerate(q['reponses'], 1):
             lettre = chr(96 + j)  # Convertir 1 -> 'a', 2 -> 'b', etc.
-            doc_questions.add_paragraph(f"□{lettre}. {choice}")
+            p = doc_questions.add_paragraph(f"□ {lettre}. {choice}")
+            p.paragraph_format.left_indent = Inches(0.25)  # Ajouter un alinéa
             
             if choice == q['bonne_reponse']:
                 reponses_text.append(lettre)
