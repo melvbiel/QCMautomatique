@@ -12,8 +12,8 @@ def format_paysage(doc):
     section.right_margin = Inches(0.5)
     section.top_margin = Inches(0.5)
     section.bottom_margin = Inches(0.5)
-    
-    # Définir la mise en page en deux colonnes après le heading
+
+def set_columns(section):
     sectPr = section._sectPr
     cols = OxmlElement('w:cols')
     cols.set(qn('w:num'), '2')  # Deux colonnes
@@ -35,8 +35,14 @@ def create_qcm():
     
     doc_questions = Document()
     format_paysage(doc_questions)  # Format paysage
-    doc_questions.add_heading('Questionnaire à Choix Multiples', 0)
-    doc_questions.add_paragraph()  # Ajoute un espace après le titre pour éviter l'écrasement
+    heading = doc_questions.add_heading('Questionnaire à Choix Multiples', 0)
+    heading.alignment = 1
+    doc_questions.add_paragraph()  # Ajoute un espace après le titre
+    doc_questions.add_paragraph()  # Autre espace après la ligne
+    
+    # Ajouter une nouvelle section juste après le heading sans passer à une nouvelle page
+    section = doc_questions.sections[0]
+    set_columns(section)
     
     doc_reponses = Document()
     doc_reponses.add_heading('Réponses du Questionnaire', 0)
@@ -44,22 +50,50 @@ def create_qcm():
     reponses_text = []
     
     for index, q in enumerate(questions_melangees):
+        if index == 10:
+            doc_questions.add_page_break()  # Insérer un saut de page après 10 questions
         p_question = doc_questions.add_paragraph()
         run_question = p_question.add_run(f"{index + 1}. {q['question']}")
         run_question.font.size = Pt(9)
-        set_line_spacing(p_question, 1.15, before=10, after=10)
+        set_line_spacing(p_question, 1.0, before=3, after=3)
         
         for k, choice in enumerate(q['reponses'], 1):
             lettre = chr(96 + k)
             p = doc_questions.add_paragraph(style='List Bullet')
             run = p.add_run(f"{lettre}. {choice}")
             run.font.size = Pt(9)
-            set_line_spacing(p, 1.15, before=5, after=5)
+            set_line_spacing(p, 1.0, before=2, after=2)
         
         doc_questions.add_paragraph()  # Ajout d'un saut de ligne après chaque question
         
         if q['bonne_reponse'] in q['reponses']:
             reponses_text.append(chr(96 + q['reponses'].index(q['bonne_reponse']) + 1))
+    
+    # Ajouter un tableau réduit en bas à droite
+    table = doc_questions.add_table(rows=2, cols=20)
+    table.autofit = False
+    
+    for row in table.rows:
+        for cell in row.cells:
+            cell.width = Inches(0.3)  # Taille réduite des cellules
+            cell.paragraphs[0].paragraph_format.alignment = 1  # Centrer le texte
+            tcPr = cell._element.get_or_add_tcPr()
+            borders = OxmlElement('w:tcBorders')
+            for border_name in ('top', 'left', 'bottom', 'right'):
+                border = OxmlElement(f'w:{border_name}')
+                border.set(qn('w:val'), 'single')  # Bordure simple
+                border.set(qn('w:sz'), '4')  # Taille fine
+                border.set(qn('w:space'), '0')
+                border.set(qn('w:color'), '000000')
+                borders.append(border)
+            tcPr.append(borders)
+    
+    # Remplir la première ligne avec les numéros de 1 à 20
+    for i in range(20):
+        table.cell(0, i).text = str(i + 1)
+    
+    doc_questions.add_paragraph("\n\n\n")  # Espacement pour aligner en bas
+    doc_questions.add_paragraph().add_run(" ")  # Assurer la bonne position
     
     doc_reponses.add_paragraph("Réponses :")
     doc_reponses.add_paragraph(", ".join(reponses_text))
@@ -69,4 +103,3 @@ def create_qcm():
 
 create_qcm()
 print("Fichiers créés avec succès !")
-
