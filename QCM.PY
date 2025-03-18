@@ -62,11 +62,26 @@ def generer_questionnaires():
 root = tk.Tk()
 root.title("Générateur de Questionnaires")
 
-tk.Label(root, text="Nombre de questionnaires:").pack()
+# Centrer la fenêtre
+largeur_fenetre = 400  # Largeur de la fenêtre
+hauteur_fenetre = 200  # Hauteur de la fenêtre
+
+# Obtenir la largeur et la hauteur de l'écran
+largeur_ecran = root.winfo_screenwidth()
+hauteur_ecran = root.winfo_screenheight()
+
+# Calculer la position x et y pour centrer la fenêtre
+x = (largeur_ecran // 2) - (largeur_fenetre // 2)
+y = (hauteur_ecran // 2) - (hauteur_fenetre // 2)
+
+# Définir la géométrie de la fenêtre
+root.geometry(f'{largeur_fenetre}x{hauteur_fenetre}+{x}+{y}')
+
+tk.Label(root, text="Nombre de questionnaires:",bg="greenyellow",).pack()
 entree_nombre = tk.Entry(root)
 entree_nombre.pack()
 
-bouton_generer = tk.Button(root, text="Générer", command=generer_questionnaires)
+bouton_generer = tk.Button(root, text="Générer", command=generer_questionnaires,fg="red",relief=tk.RAISED)
 bouton_generer.pack()
 
 # Charger les questions
